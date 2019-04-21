@@ -1,0 +1,28 @@
+### Movies Index
+GET https://localhost:8081/api/v1/movies HTTP/1.1
+
+
+### Movies Create
+POST https://localhost:8081/api/v1/movies HTTP/1.1
+Content-Type: "application/json"
+
+{
+  "title": "Movie 1"
+}
+
+
+### Movies Show
+GET https://localhost:8081/api/v1/movies/1 HTTP/1.1
+
+
+### Movies Update
+PUT https://localhost:8081/api/v1/movies/1 HTTP/1.1
+Content-Type: "application/json"
+
+{
+  "title": "Movie One"
+}
+
+
+### Movies Delete
+DELETE https://localhost:8081/api/v1/movies/1 HTTP/1.1
