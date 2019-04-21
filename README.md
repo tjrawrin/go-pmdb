@@ -1,7 +1,7 @@
 Personal Movie Database (pmdb)
 
-Server: GO, SQLite, REST API; for storing and serving owned movies.
+GO, SQLite, REST API; for storing and serving movies.
 
-Client: Vue, PWA, Open Movie DB; for interacting and viewing owned movies.
+Vue, PWA, OMDb API; for adding, removing, updating, and viewing movies.
 
 
