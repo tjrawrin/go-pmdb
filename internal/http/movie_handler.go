@@ -153,6 +153,15 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Call GetMovie to get the movie from the database.
+	if _, err := m.MovieService.GetMovie(id); err != nil {
+		// Set the status to 404.
+		w.WriteHeader(http.StatusNotFound)
+		// Respond with error json message.
+		json.NewEncoder(w).Encode(map[string]string{"error": "Not Found"})
+		return
+	}
+
 	// Read the request body (limited to 1048576 bytes).
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	defer r.Body.Close()
@@ -200,9 +209,6 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Delete responds to a request for removing a movie.
-//
-// TODO(tim): Delete responds with a 200 even if the user attempts to delete
-// an ID that doesn't exist. Fix this...
 func (m *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Set the header Content-Type.
 	w.Header().Set("Content-Type", "application/json")
@@ -210,6 +216,15 @@ func (m *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
+		// Set the status to 404.
+		w.WriteHeader(http.StatusNotFound)
+		// Respond with error json message.
+		json.NewEncoder(w).Encode(map[string]string{"error": "Not Found"})
+		return
+	}
+
+	// Call GetMovie to get the movie from the database.
+	if _, err := m.MovieService.GetMovie(id); err != nil {
 		// Set the status to 404.
 		w.WriteHeader(http.StatusNotFound)
 		// Respond with error json message.
