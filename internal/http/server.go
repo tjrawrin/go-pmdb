@@ -19,8 +19,6 @@ type Server struct {
 // Run kicks everything off by setting the routes and launching the HTTP
 // and HTTPS servers in goroutines. It returns an error if something fails.
 func (srv *Server) Run() error {
-	// srv.setRoutes()
-
 	errs := make(chan error, 1)
 
 	go srv.newHTTPServer(errs)
@@ -28,25 +26,6 @@ func (srv *Server) Run() error {
 
 	return <-errs
 }
-
-// setRoutes configures the routing and loads any middleware.
-// func (srv *Server) setRoutes() {
-// 	router := chi.NewRouter()
-
-// 	router.Use(middleware.RealIP)
-// 	router.Use(middleware.Logger)
-// 	router.Use(middleware.Recoverer)
-// 	router.Use(middleware.DefaultCompress)
-
-// 	// Non-API routes
-// 	// router.Mount("/", (&PageHandler{}).Routes())
-// 	router.Mount("/movies", srv.MovieHandler.Routes())
-
-// 	// API (v1) routes
-// 	// router.Route("/api/v1", func(r chi.Router) {
-// 	// 	r.Mount("/movies", (&APIMoviesResource{}).Routes())
-// 	// })
-// }
 
 // newHTTPServer configures and starts the HTTP server.
 // It sends any errors via a channel if the server fails to start.
