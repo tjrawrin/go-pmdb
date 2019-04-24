@@ -7,7 +7,8 @@ POST https://localhost:8081/api/v1/movies HTTP/1.1
 Content-Type: "application/json"
 
 {
-  "title": "Movie 1"
+  "title": "Avengers: Endgame",
+  "imdbId": "tt4154796"
 }
 
 
@@ -20,9 +21,10 @@ PUT https://localhost:8081/api/v1/movies/1 HTTP/1.1
 Content-Type: "application/json"
 
 {
-  "title": "Movie One"
+  "title": "Movie One",
+  "imdbId": "tt4154796"
 }
 
 
 ### Movies Delete
-DELETE https://localhost:8081/api/v1/movies/1 HTTP/1.1
+DELETE https://localhost:8081/api/v1/movies/2 HTTP/1.1

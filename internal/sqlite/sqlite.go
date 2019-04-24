@@ -52,8 +52,13 @@ func initialize(db *sql.DB) error {
 func moviesTable(db *sql.Tx) error {
 	stmt := `
 		CREATE TABLE IF NOT EXISTS movies(
-			id INTEGER PRIMARY KEY,
-			title TEXT
+			id INTEGER PRIMARY KEY NOT NULL,
+			title VARCHAR(255) NOT NULL,
+			imdb_id VARCHAR(255) UNIQUE NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+
+			CHECK (length(title) > 0 AND length(imdb_id) > 0)
 		);
 	`
 

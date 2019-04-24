@@ -1,9 +1,14 @@
 package service
 
+import "time"
+
 // Movie is a struct containing information about a movie.
 type Movie struct {
-	ID    int64  `json:"id"`
-	Title string `json:"title"`
+	ID        int64     `json:"id"`
+	Title     string    `json:"title"`
+	ImdbID    string    `json:"imdbId"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // Movies is a slice of movie structs.

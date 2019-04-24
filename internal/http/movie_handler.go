@@ -39,7 +39,11 @@ func (m *MovieHandler) Index(w http.ResponseWriter, r *http.Request) {
 	// Call GetMovies to retrieve all movies from the database.
 	if movies, err := m.MovieService.GetMovies(); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		render.JSON(w, http.StatusInternalServerError,
+			map[string]string{
+				"error":   "Internal Server Error",
+				"message": err.Error(),
+			})
 	} else {
 		// If the movies slice does not return nil. Respond with the movies,
 		// otherwise respond with an empty slice.
@@ -60,7 +64,11 @@ func (m *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity, map[string]string{"error": "Unprocessable Entity"})
+		render.JSON(w, http.StatusUnprocessableEntity,
+			map[string]string{
+				"error":   "Unprocessable Entity",
+				"message": err.Error(),
+			})
 		return
 	}
 
@@ -69,7 +77,11 @@ func (m *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &movie)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity, map[string]string{"error": "Unprocessable Entity"})
+		render.JSON(w, http.StatusUnprocessableEntity,
+			map[string]string{
+				"error":   "Unprocessable Entity",
+				"message": err.Error(),
+			})
 		return
 	}
 
@@ -77,14 +89,22 @@ func (m *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 	id, err := m.MovieService.CreateMovie(movie)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		render.JSON(w, http.StatusInternalServerError,
+			map[string]string{
+				"error":   "Internal Server Error",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
 	if movie, err := m.MovieService.GetMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusCreated, movie)
@@ -97,14 +117,22 @@ func (m *MovieHandler) Show(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
 	if movie, err := m.MovieService.GetMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusOK, movie)
@@ -117,14 +145,22 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
 	if _, err := m.MovieService.GetMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 		return
 	}
 
@@ -133,7 +169,11 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity, map[string]string{"error": "Unprocessable Entity"})
+		render.JSON(w, http.StatusUnprocessableEntity,
+			map[string]string{
+				"error":   "Unprocessable Entity",
+				"message": err.Error(),
+			})
 		return
 	}
 
@@ -142,7 +182,11 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &movie)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity, map[string]string{"error": "Unprocessable Entity"})
+		render.JSON(w, http.StatusUnprocessableEntity,
+			map[string]string{
+				"error":   "Unprocessable Entity",
+				"message": err.Error(),
+			})
 		return
 	}
 
@@ -150,14 +194,22 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = m.MovieService.UpdateMovie(id, movie)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		render.JSON(w, http.StatusInternalServerError,
+			map[string]string{
+				"error":   "Internal Server Error",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
 	if movie, err := m.MovieService.GetMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusCreated, movie)
@@ -170,21 +222,33 @@ func (m *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
 	if _, err := m.MovieService.GetMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound, map[string]string{"error": "Not Found"})
+		render.JSON(w, http.StatusNotFound,
+			map[string]string{
+				"error":   "Not Found",
+				"message": err.Error(),
+			})
 		return
 	}
 
 	// Call DeleteMovie to remove the movie from the database.
 	if err = m.MovieService.DeleteMovie(id); err != nil {
 		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		render.JSON(w, http.StatusInternalServerError,
+			map[string]string{
+				"error":   "Internal Server Error",
+				"message": err.Error(),
+			})
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusOK, map[string]string{})

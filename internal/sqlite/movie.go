@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"time"
 
 	"../service"
 )
@@ -22,7 +23,8 @@ func (s *MovieService) GetMovies() (*service.Movies, error) {
 	var movies service.Movies
 	for rows.Next() {
 		var movie service.Movie
-		if err := rows.Scan(&movie.ID, &movie.Title); err != nil {
+		if err := rows.Scan(&movie.ID, &movie.Title, &movie.ImdbID,
+			&movie.CreatedAt, &movie.UpdatedAt); err != nil {
 			return nil, err
 		}
 		movies = append(movies, &movie)
@@ -33,9 +35,14 @@ func (s *MovieService) GetMovies() (*service.Movies, error) {
 
 // GetMovie returns a single movie from the database.
 func (s *MovieService) GetMovie(id int64) (*service.Movie, error) {
-	row := s.DB.QueryRow(`SELECT id, title FROM movies WHERE id = $1;`, id)
+	row := s.DB.QueryRow(`
+		SELECT id, title, imdb_id, created_at, updated_at
+		FROM movies
+		WHERE id = $1;
+	`, id)
 	var movie service.Movie
-	if err := row.Scan(&movie.ID, &movie.Title); err != nil {
+	if err := row.Scan(&movie.ID, &movie.Title, &movie.ImdbID,
+		&movie.CreatedAt, &movie.UpdatedAt); err != nil {
 		return nil, err
 	}
 
@@ -44,7 +51,10 @@ func (s *MovieService) GetMovie(id int64) (*service.Movie, error) {
 
 // CreateMovie adds a new movie to the database.
 func (s *MovieService) CreateMovie(movie *service.Movie) (int64, error) {
-	res, err := s.DB.Exec(`INSERT INTO movies (title) VALUES ($1);`, movie.Title)
+	res, err := s.DB.Exec(`
+		INSERT INTO movies (title, imdb_id, created_at, updated_at)
+		VALUES ($1, $2, $3, $3);
+	`, movie.Title, movie.ImdbID, time.Now())
 	if err != nil {
 		return 0, err
 	}
@@ -59,7 +69,11 @@ func (s *MovieService) CreateMovie(movie *service.Movie) (int64, error) {
 
 // UpdateMovie updates an existing movie in the database.
 func (s *MovieService) UpdateMovie(id int64, movie *service.Movie) error {
-	_, err := s.DB.Exec(`UPDATE movies SET id = $1, title = $2 WHERE id = $1;`, id, movie.Title)
+	_, err := s.DB.Exec(`
+		UPDATE movies
+		SET id = $1, title = $2, imdb_id = $3, updated_at = $4
+		WHERE id = $1;
+	`, id, movie.Title, movie.ImdbID, time.Now())
 	if err != nil {
 		return err
 	}
