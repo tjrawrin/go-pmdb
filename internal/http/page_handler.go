@@ -16,13 +16,13 @@ func (p *PageHandler) Routes() chi.Router {
 	// Load middleware specific to this router.
 	// r.Use()
 
-	r.Get("/*", p.Index)
+	r.Get("/*", p.index)
 
 	return r
 }
 
 // Index responds to a request for the site index page.
-func (p *PageHandler) Index(w http.ResponseWriter, r *http.Request) {
+func (p *PageHandler) index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
 
