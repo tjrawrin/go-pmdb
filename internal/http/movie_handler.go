@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -44,6 +45,7 @@ func (m *MovieHandler) index(w http.ResponseWriter, r *http.Request) {
 				"error":   "Internal Server Error",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 	} else {
 		// If the movies slice does not return nil. Respond with the movies,
 		// otherwise respond with an empty slice.
@@ -69,6 +71,7 @@ func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
 				"error":   "Unprocessable Entity",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -82,6 +85,7 @@ func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
 				"error":   "Unprocessable Entity",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -94,6 +98,7 @@ func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
 				"error":   "Internal Server Error",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -105,6 +110,7 @@ func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusCreated, movie)
@@ -122,6 +128,7 @@ func (m *MovieHandler) show(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -133,6 +140,7 @@ func (m *MovieHandler) show(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusOK, movie)
@@ -150,6 +158,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -161,6 +170,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -174,6 +184,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Unprocessable Entity",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -187,6 +198,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Unprocessable Entity",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -199,6 +211,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Internal Server Error",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -210,6 +223,7 @@ func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusCreated, movie)
@@ -227,6 +241,7 @@ func (m *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -238,6 +253,7 @@ func (m *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
 				"error":   "Not Found",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 		return
 	}
 
@@ -249,6 +265,7 @@ func (m *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
 				"error":   "Internal Server Error",
 				"message": err.Error(),
 			})
+		log.Println("Error:", err)
 	} else {
 		// Render a JSON response and set status code.
 		render.JSON(w, http.StatusOK, map[string]string{})
