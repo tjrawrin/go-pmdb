@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"../render"
 	"github.com/go-chi/chi"
 )
 
@@ -23,8 +24,5 @@ func (p *PageHandler) Routes() chi.Router {
 
 // Index responds to a request for the site index page.
 func (p *PageHandler) index(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK)
-
-	w.Write([]byte("<h1>Page#Index</h1>"))
+	render.HTML(w, http.StatusOK, "index.html", nil)
 }
