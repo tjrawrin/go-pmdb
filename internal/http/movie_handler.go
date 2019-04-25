@@ -25,17 +25,17 @@ func (m *MovieHandler) Routes() chi.Router {
 	// Load middleware specific to this router.
 	// r.Use()
 
-	r.Get("/", m.Index)
-	r.Post("/", m.Create)
-	r.Get("/{id}", m.Show)
-	r.Put("/{id}", m.Update)
-	r.Delete("/{id}", m.Delete)
+	r.Get("/", m.index)
+	r.Post("/", m.create)
+	r.Get("/{id}", m.show)
+	r.Put("/{id}", m.update)
+	r.Delete("/{id}", m.delete)
 
 	return r
 }
 
 // Index responds to a request for a list of movies.
-func (m *MovieHandler) Index(w http.ResponseWriter, r *http.Request) {
+func (m *MovieHandler) index(w http.ResponseWriter, r *http.Request) {
 	// Call GetMovies to retrieve all movies from the database.
 	if movies, err := m.MovieService.GetMovies(); err != nil {
 		// Render a JSON response and set status code.
@@ -58,7 +58,7 @@ func (m *MovieHandler) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create responds to a request for adding a movie.
-func (m *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
 	// Read the request body (limited to 1048576 bytes).
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	defer r.Body.Close()
@@ -112,7 +112,7 @@ func (m *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // Show responds to a request for a single movie.
-func (m *MovieHandler) Show(w http.ResponseWriter, r *http.Request) {
+func (m *MovieHandler) show(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -140,7 +140,7 @@ func (m *MovieHandler) Show(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update responds to a request for updating a movie.
-func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -217,7 +217,7 @@ func (m *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Delete responds to a request for removing a movie.
-func (m *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (m *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
