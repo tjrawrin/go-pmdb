@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"../../internal/http"
+	"../../internal/http/api"
 	"../../internal/sqlite"
 )
 
@@ -19,13 +20,15 @@ func main() {
 	movieService := &sqlite.MovieService{DB: db}
 
 	// Init handlers and attach services to handlers if necessary.
+	apiMovieHandler := &api.MovieHandler{MovieService: movieService}
 	movieHandler := &http.MovieHandler{MovieService: movieService}
 	pageHandler := &http.PageHandler{}
 
 	// Attach handlers to router.
 	router := &http.Router{
-		MovieHandler: movieHandler,
-		PageHandler:  pageHandler,
+		APIMovieHandler: apiMovieHandler,
+		MovieHandler:    movieHandler,
+		PageHandler:     pageHandler,
 	}
 
 	// Create a server.

@@ -1,9 +1,6 @@
 package http
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,255 +16,204 @@ type MovieHandler struct {
 	MovieService *sqlite.MovieService
 }
 
-// Routes creates a REST router for the movie handler.
-func (m *MovieHandler) Routes() chi.Router {
+// Routes creates a REST router for the page handler.
+func (h *MovieHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	// Load middleware specific to this router.
 	// r.Use()
 
-	r.Get("/", m.index)
-	r.Post("/", m.create)
-	r.Get("/{id}", m.show)
-	r.Put("/{id}", m.update)
-	r.Delete("/{id}", m.delete)
+	r.Get("/", h.index)
+	r.Get("/new", h.new)
+	r.Post("/", h.create)
+	r.Get("/{id}", h.show)
+	r.Get("/{id}/edit", h.edit)
+	r.Put("/{id}", h.update)
+	r.Post("/{id}", h.delete)
 
 	return r
 }
 
 // Index responds to a request for a list of movies.
-func (m *MovieHandler) index(w http.ResponseWriter, r *http.Request) {
+func (h *MovieHandler) index(w http.ResponseWriter, r *http.Request) {
 	// Call GetMovies to retrieve all movies from the database.
-	if movies, err := m.MovieService.GetMovies(); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError,
-			map[string]string{
-				"error":   "Internal Server Error",
-				"message": err.Error(),
-			})
+	if movies, err := h.MovieService.GetMovies(); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error:", err)
 	} else {
-		// If the movies slice does not return nil. Respond with the movies,
-		// otherwise respond with an empty slice.
-		if *movies != nil {
-			// Render a JSON response and set status code.
-			render.JSON(w, http.StatusOK, movies)
-		} else {
-			// Render a JSON response and set status code.
-			render.JSON(w, http.StatusOK, []string{})
-		}
+		// Render a HTML response and set status code.
+		render.HTML(w, http.StatusOK, "movie/index.html", movies)
 	}
 }
 
+// New responds to a request for entering details for a movie.
+func (h *MovieHandler) new(w http.ResponseWriter, r *http.Request) {
+	// Render a HTML response and set status code.
+	render.HTML(w, http.StatusOK, "movie/new.html", nil)
+}
+
 // Create responds to a request for adding a movie.
-func (m *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
-	// Read the request body (limited to 1048576 bytes).
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	defer r.Body.Close()
+func (h *MovieHandler) create(w http.ResponseWriter, r *http.Request) {
+	// Parse the page form values.
+	err := r.ParseForm()
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity,
-			map[string]string{
-				"error":   "Unprocessable Entity",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Unprocessable Entity", http.StatusUnprocessableEntity)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Create a temporary movie struct to unmarshal the request body into.
-	var movie *service.Movie
-	err = json.Unmarshal(body, &movie)
-	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity,
-			map[string]string{
-				"error":   "Unprocessable Entity",
-				"message": err.Error(),
-			})
-		log.Println("Error:", err)
-		return
+	movie := &service.Movie{
+		Title:  r.FormValue("title"),
+		ImdbID: r.FormValue("imdb_id"),
 	}
 
 	// Call the CreateMovie to add the new movie to the database.
-	id, err := m.MovieService.CreateMovie(movie)
+	id, err := h.MovieService.CreateMovie(movie)
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError,
-			map[string]string{
-				"error":   "Internal Server Error",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
-	if movie, err := m.MovieService.GetMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+	if _, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 	} else {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusCreated, movie)
+		http.Redirect(w, r, "/movies/"+strconv.FormatInt(id, 10), http.StatusCreated)
+		return
 	}
 }
 
 // Show responds to a request for a single movie.
-func (m *MovieHandler) show(w http.ResponseWriter, r *http.Request) {
+func (h *MovieHandler) show(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
-	if movie, err := m.MovieService.GetMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+	if movie, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 	} else {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusOK, movie)
+		// Render a HTML response and set status code.
+		render.HTML(w, http.StatusOK, "movie/show.html", movie)
+	}
+}
+
+// Edit responds to a request for entering details for a movie.
+func (h *MovieHandler) edit(w http.ResponseWriter, r *http.Request) {
+	// Parse the id param from the URL and convert it into an int64.
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
+		log.Println("Error:", err)
+		return
+	}
+
+	// Call GetMovie to get the movie from the database.
+	if movie, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
+		log.Println("Error:", err)
+	} else {
+		// Render a HTML response and set status code.
+		render.HTML(w, http.StatusOK, "movie/edit.html", movie)
 	}
 }
 
 // Update responds to a request for updating a movie.
-func (m *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
+func (h *MovieHandler) update(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
-	if _, err := m.MovieService.GetMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+	if _, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 		return
 	}
 
-	// Read the request body (limited to 1048576 bytes).
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	defer r.Body.Close()
+	// Parse the page form values.
+	err = r.ParseForm()
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity,
-			map[string]string{
-				"error":   "Unprocessable Entity",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Unprocessable Entity", http.StatusUnprocessableEntity)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Create a temporary movie struct to unmarshal the request body into.
-	var movie *service.Movie
-	err = json.Unmarshal(body, &movie)
-	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusUnprocessableEntity,
-			map[string]string{
-				"error":   "Unprocessable Entity",
-				"message": err.Error(),
-			})
-		log.Println("Error:", err)
-		return
+	movie := &service.Movie{
+		Title:  r.FormValue("title"),
+		ImdbID: r.FormValue("imdb_id"),
 	}
 
 	// Call UpdateMovie to update the movie in the database.
-	err = m.MovieService.UpdateMovie(id, movie)
+	err = h.MovieService.UpdateMovie(id, movie)
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError,
-			map[string]string{
-				"error":   "Internal Server Error",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
-	if movie, err := m.MovieService.GetMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+	if _, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 	} else {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusCreated, movie)
+		http.Redirect(w, r, "/movies/"+strconv.FormatInt(id, 10), http.StatusCreated) // TODO(tim): FIX THIS
+		return
 	}
 }
 
 // Delete responds to a request for removing a movie.
-func (m *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
+func (h *MovieHandler) delete(w http.ResponseWriter, r *http.Request) {
 	// Parse the id param from the URL and convert it into an int64.
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call GetMovie to get the movie from the database.
-	if _, err := m.MovieService.GetMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusNotFound,
-			map[string]string{
-				"error":   "Not Found",
-				"message": err.Error(),
-			})
+	if _, err := h.MovieService.GetMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Not Found", http.StatusNotFound)
 		log.Println("Error:", err)
 		return
 	}
 
 	// Call DeleteMovie to remove the movie from the database.
-	if err = m.MovieService.DeleteMovie(id); err != nil {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusInternalServerError,
-			map[string]string{
-				"error":   "Internal Server Error",
-				"message": err.Error(),
-			})
+	if err = h.MovieService.DeleteMovie(id); err != nil {
+		// Render an error response and set status code.
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error:", err)
 	} else {
-		// Render a JSON response and set status code.
-		render.JSON(w, http.StatusOK, map[string]string{})
+		http.Redirect(w, r, "/movies", http.StatusSeeOther) // TODO(tim): FIX THIS
+		return
 	}
 }

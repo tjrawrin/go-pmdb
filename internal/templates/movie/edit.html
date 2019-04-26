@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PMDB</title>
+</head>
+
+<body>
+  <h1>Movies#Edit</h1>
+  <form action="/movies/{{ .ID }}" method="post">
+    <input type="text" name="title" id="title" value="{{ .Title }}">
+    <input type="text" name="imdb_id" id="imdb_id" value="{{ .ImdbID }}">
+    <button type="submit">Update Movie</button>
+  </form>
+</body>
+
+</html>
